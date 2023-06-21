@@ -65,7 +65,7 @@ impl Slave {
                 }
                 bound_handler.poll();
                 // TODO: use a timed out poll once rouille provides it
-                std::thread::sleep(std::time::Duration::from_millis(5));
+                std::thread::sleep(std::time::Duration::from_secs(1));
             }
             shutdown_manager.shutdown();
         });
