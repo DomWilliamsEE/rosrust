@@ -10,7 +10,7 @@ use std::time;
 const BILLION: i64 = 1_000_000_000;
 
 /// ROS representation of time, with nanosecond precision
-#[derive(Copy, Clone, Default, Serialize, Deserialize, Debug, Eq)]
+#[derive(Copy, Clone, Serialize, Deserialize, Debug, Eq)]
 pub struct Time {
     /// Number of seconds.
     pub sec: u32,
@@ -24,6 +24,12 @@ impl Hash for Time {
     }
 }
 
+impl Default for Time {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Time {
     /// Creates a new time of zero value.
     ///
@@ -34,8 +40,8 @@ impl Time {
     /// assert_eq!(Time::new(), Time { sec: 0, nsec: 0 });
     /// ```
     #[inline]
-    pub fn new() -> Time {
-        Self::default()
+    pub const fn new() -> Time {
+        Self { sec: 0, nsec: 0 }
     }
 
     /// Creates a time of the given number of nanoseconds.
@@ -48,7 +54,7 @@ impl Time {
     /// assert_eq!(Time::from_nanos(12_000_000_123), Time { sec: 12, nsec: 123 });
     /// ```
     #[inline]
-    pub fn from_nanos(t: i64) -> Time {
+    pub const fn from_nanos(t: i64) -> Time {
         Time {
             sec: (t / BILLION) as u32,
             nsec: (t % BILLION) as u32,
@@ -65,7 +71,7 @@ impl Time {
     /// assert_eq!(Time::from_seconds(12), Time { sec: 12, nsec: 0 });
     /// ```
     #[inline]
-    pub fn from_seconds(sec: u32) -> Time {
+    pub const fn from_seconds(sec: u32) -> Time {
         Time { sec, nsec: 0 }
     }
 
@@ -154,7 +160,7 @@ impl From<Time> for time::SystemTime {
 }
 
 /// ROS representation of duration, with nanosecond precision
-#[derive(Copy, Clone, Default, Serialize, Deserialize, Debug, Eq)]
+#[derive(Copy, Clone, Serialize, Deserialize, Debug, Eq)]
 pub struct Duration {
     /// Number of seconds. Negative for negative durations.
     pub sec: i32,
@@ -165,6 +171,12 @@ pub struct Duration {
 impl Hash for Duration {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.nanos().hash(state)
+    }
+}
+
+impl Default for Duration {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -192,8 +204,8 @@ impl Duration {
     /// assert_eq!(Duration::new(), Duration { sec: 0, nsec: 0 });
     /// ```
     #[inline]
-    pub fn new() -> Duration {
-        Self::default()
+    pub const fn new() -> Duration {
+        Self { sec: 0, nsec: 0 }
     }
 
     /// Creates a duration of the given number of nanoseconds.
@@ -207,7 +219,7 @@ impl Duration {
     /// assert_eq!(Duration::from_nanos(-12_000_000_123), Duration { sec: -12, nsec: -123 });
     /// ```
     #[inline]
-    pub fn from_nanos(t: i64) -> Duration {
+    pub const fn from_nanos(t: i64) -> Duration {
         Duration {
             sec: (t / BILLION) as i32,
             nsec: (t % BILLION) as i32,
@@ -225,7 +237,7 @@ impl Duration {
     /// assert_eq!(Duration::from_seconds(-12), Duration { sec: -12, nsec: 0 });
     /// ```
     #[inline]
-    pub fn from_seconds(sec: i32) -> Duration {
+    pub const fn from_seconds(sec: i32) -> Duration {
         Duration { sec, nsec: 0 }
     }
 
