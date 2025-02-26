@@ -95,6 +95,11 @@ pub fn rerun_if_folder_content_changed(folder: &Path) {
         return;
     }
     if let Some(name) = folder.to_str() {
+        if name.starts_with('.') {
+            // skip hidden dirs such as .git, .idea, etc
+            return;
+        }
+
         rerun_if_file_changed(name);
     }
     if let Ok(children) = fs::read_dir(folder) {
