@@ -387,34 +387,39 @@ impl Ros {
     fn log_to_terminal(&self, level: i8, msg: &str, file: &str, line: u32) {
         use colored::{Color, Colorize};
 
-        let format_string =
-            |prefix, color| format!("[{} @ {}:{}]: {}", prefix, file, line, msg).color(color);
+        macro_rules! format_string {
+            ($prefix:expr, $color:expr) => {
+            format_args!("[{} @ {}:{}]: {}", $prefix, file, line, msg)
+            };
+        }
 
         match level {
-            Log::DEBUG => println!("{}", format_string("DEBUG", Color::White)),
-            Log::INFO => println!("{}", format_string("INFO", Color::White)),
-            Log::WARN => eprintln!("{}", format_string("WARN", Color::Yellow)),
-            Log::ERROR => eprintln!("{}", format_string("ERROR", Color::Red)),
-            Log::FATAL => eprintln!("{}", format_string("FATAL", Color::Red)),
+            Log::DEBUG => println!("{}", format_string!("DEBUG", Color::White)),
+            Log::INFO => println!("{}", format_string!("INFO", Color::White)),
+            Log::WARN => eprintln!("{}", format_string!("WARN", Color::Yellow)),
+            Log::ERROR => eprintln!("{}", format_string!("ERROR", Color::Red)),
+            Log::FATAL => eprintln!("{}", format_string!("FATAL", Color::Red)),
             _ => {}
         }
     }
 
     pub fn log(&self, level: i8, msg: String, file: &str, line: u32) {
         self.log_to_terminal(level, &msg, file, line);
-        let topics = self.slave.publications.get_topic_names();
-        let message = Log {
-            header: Header::default(),
-            level,
-            msg,
-            name: self.name.clone(),
-            line,
-            file: file.into(),
-            function: String::default(),
-            topics,
-        };
         let maybe_logger = self.logger.lock().unwrap();
         if let Some(logger) = maybe_logger.deref() {
+
+            let topics = self.slave.publications.get_topic_names();
+            let message = Log {
+                header: Header::default(),
+                level,
+                msg,
+                name: self.name.clone(),
+                line,
+                file: file.into(),
+                function: String::default(),
+                topics,
+            };
+
             if let Err(err) = logger.send(message) {
                 error!("Logging error: {}", err);
             }
